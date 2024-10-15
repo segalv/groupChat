@@ -86,7 +86,7 @@ public class Client {
         String username = scanner.nextLine();
         Socket socket = new Socket("localhost", 1234);
         Client client = new Client(socket, username);
-        System.out.println("Bem vindo ao Chat!\nCaso queira sair do chat é só escrever 'EXIT'!"); //AQUIIII
+        System.out.println("Bem vindo ao Chat, " + client.username + "!\nCaso queira sair do chat é só escrever 'EXIT'!"); //AQUIIII
         client.recebeMensagem();
         client.enviaMensagem();
     }

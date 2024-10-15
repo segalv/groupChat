@@ -78,7 +78,7 @@ public class ClientHandler implements Runnable{
                 }
             }
         };
-        timerInatividade.schedule(tarefa, 30000); //enviamos o aviso à cada 5 minutos corridos de inatividade - 300000
+        timerInatividade.schedule(tarefa, 300000); //enviamos o aviso à cada 5 minutos corridos de inatividade
     }
 
     public void aguardaRetornoAtiv(){
@@ -99,7 +99,7 @@ public class ClientHandler implements Runnable{
                 }
             }
         };
-        timerAguardoRetornoAtiv.schedule(tarefa, 15000); //esperamos mais 1 min antes de fechar a conexão - 60000
+        timerAguardoRetornoAtiv.schedule(tarefa, 60000); //esperamos mais 1 min antes de fechar a conexão
     }
 
 

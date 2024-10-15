@@ -1,7 +1,6 @@
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
-//ADIC
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -11,9 +10,8 @@ public class ClientHandler implements Runnable{
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
     private String usernameCliente;
-
-    //private Timer timerInatividade; //ADIC
-    //private Timer timerAguardoRetornoAtiv; //ADIC
+    private Timer timerInatividade;
+    private Timer timerAguardoRetornoAtiv;
 
     public ClientHandler(Socket socket){
         try {
@@ -21,9 +19,8 @@ public class ClientHandler implements Runnable{
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.usernameCliente = bufferedReader.readLine();
-
-            //this.timerInatividade = new Timer(); //ADIC
-            //this.timerAguardoRetornoAtiv = new Timer(); //ADIC
+            this.timerInatividade = new Timer();
+            this.timerAguardoRetornoAtiv = new Timer();
             clientHandlers.add(this);
             broadcastMessage("SERVIDOR: " + usernameCliente + " entrou no Chat!");
         } catch (IOException e) {
@@ -42,9 +39,8 @@ public class ClientHandler implements Runnable{
                     break; //adicio
                 }
                 else{
-                    /*
-                    //caso uma mensagem seja enviada, "restartamos" o timer,
-                    // impedindo que a conexão seja interrompida por mais 5 minutos!
+                    //caso uma mensagem seja enviada, "restartamos" os timers,
+                    // impedindo que a conexão seja interrompida por mais 6 minutos!
                     if (timerInatividade != null) {
                         timerInatividade.cancel();
                     }
@@ -54,7 +50,6 @@ public class ClientHandler implements Runnable{
                         timerAguardoRetornoAtiv.cancel();
                     }
                     timerAguardoRetornoAtiv = new Timer();
-                    */
 
                     broadcastMessage(mensagemDoCliente);
                 }
@@ -65,7 +60,7 @@ public class ClientHandler implements Runnable{
         }
     }
 
-/*
+
     public void avisoInatividade(){
         TimerTask tarefa = new TimerTask() {
             @Override
@@ -77,7 +72,7 @@ public class ClientHandler implements Runnable{
                     bufferedWriter.flush();
                     aguardaRetornoAtiv(); //esperamos por uma nova atividade nos próximos 1 min antes de desconectar o cliente
                 }catch (IOException e){
-                    e.printStackTrace(); //nao tenho certeza se esse eh o melhor catch
+                    e.printStackTrace();
                 }
             }
         };
@@ -93,15 +88,14 @@ public class ClientHandler implements Runnable{
                     bufferedWriter.write(aviso);
                     bufferedWriter.newLine();
                     bufferedWriter.flush();
-                    aguardaRetornoAtiv(); //esperamos por uma nova atividade nos próximos 1 min antes de desconectar o cliente
+                    closeEverything(socket, bufferedReader, bufferedWriter);
                 }catch (IOException e){
-                    e.printStackTrace(); //nao tenho certeza se esse eh o melhor catch
+                    e.printStackTrace();
                 }
-                closeEverything(socket, bufferedReader, bufferedWriter);
             }
         };
         timerAguardoRetornoAtiv.schedule(tarefa, 15000); //esperamos mais 1 min antes de fechar a conexão - 60000
-    }*/
+    }
 
 
     public void broadcastMessage(String mensagem){

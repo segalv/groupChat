@@ -14,6 +14,7 @@ public class Server {
                 Socket socket = serverSocket.accept();
                 System.out.println("Um novo cliente acabou de se conectar!");
                 ClientHandler clientHandler = new ClientHandler(socket);
+                clientHandler.avisoInatividade(); //ADIC
 
                 Thread thread = new Thread(clientHandler);
                 thread.start();

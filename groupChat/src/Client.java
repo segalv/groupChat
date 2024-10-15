@@ -42,14 +42,14 @@ public class Client {
             @Override
             public void run(){
                 String mensagemChat;
-
                 while(socket.isConnected()){
                     try{
                         mensagemChat = bufferedReader.readLine();
                         System.out.println(mensagemChat);
-                        //if(mensagemChat.equals("SERVIDOR: AVISO: Você foi desconectado!")){ //adic
-                          //  System.exit(0);
-                        //}
+                        if(mensagemChat.equals("SERVIDOR: AVISO: Você foi desconectado!")){
+                            closeEverything(socket, bufferedReader, bufferedWriter);
+                            System.exit(0);//encerra a execução do programa no lado do cliente
+                        }
                     } catch (IOException e){
                         closeEverything(socket, bufferedReader, bufferedWriter);
                     }
@@ -57,7 +57,6 @@ public class Client {
             }
         }).start();
     }
-
 
     public void closeEverything(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter){
         try{
@@ -74,7 +73,6 @@ public class Client {
             e.printStackTrace();
         }
     }
-
 
     public static void main (String [] args) throws IOException {
         Scanner scanner = new Scanner(System.in); //

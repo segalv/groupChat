@@ -88,7 +88,10 @@ public class ClientHandler implements Runnable{
                     bufferedWriter.write(aviso);
                     bufferedWriter.newLine();
                     bufferedWriter.flush();
-                    closeEverything(socket, bufferedReader, bufferedWriter);
+                    //essa mensagem vai desencadear o fechamento do socket no lado do cliente, o que será reconhecido
+                    // como uma mensagem nula, assim fechando o socket no ClientHandler também!
+                    //Caso o socket fosse fechado aqui ao invés do lado do cliente, não conseguríamos interromper sua
+                    //execução sem culminar numa duplicata de mensagens de declaração de saída do Chat.
                 }catch (IOException e){
                     e.printStackTrace();
                 }

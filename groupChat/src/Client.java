@@ -45,10 +45,15 @@ public class Client {
                 while(socket.isConnected()){
                     try{
                         mensagemChat = bufferedReader.readLine();
-                        System.out.println(mensagemChat);
-                        if(mensagemChat.equals("SERVIDOR: AVISO: Você foi desconectado!")){
-                            closeEverything(socket, bufferedReader, bufferedWriter);
-                            System.exit(0);//encerra a execução do programa no lado do cliente
+                        if (mensagemChat == null) { //quando o socket é fechado do outro lado, isso é recebido como uma mensagem nula
+                            closeEverything(socket, bufferedReader, bufferedWriter); //adicio
+                            break; //adicio
+                        }
+                        else {
+                            System.out.println(mensagemChat);
+                            if (mensagemChat.equals("SERVIDOR: AVISO: Você foi desconectado!")) {
+                                closeEverything(socket, bufferedReader, bufferedWriter);
+                            }
                         }
                     } catch (IOException e){
                         closeEverything(socket, bufferedReader, bufferedWriter);
@@ -69,6 +74,7 @@ public class Client {
             if(socket!=null) {
                 socket.close();
             }
+            System.exit(0); //encerra a execução do programa no lado do cliente
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -80,6 +86,7 @@ public class Client {
         String username = scanner.nextLine();
         Socket socket = new Socket("localhost", 1234);
         Client client = new Client(socket, username);
+        System.out.println("Bem vindo ao Chat!\nCaso queira sair do chat é só escrever 'EXIT'!"); //AQUIIII
         client.recebeMensagem();
         client.enviaMensagem();
     }

@@ -34,11 +34,13 @@ public class ClientHandler implements Runnable{
         while (socket.isConnected()){
             try{
                 mensagemDoCliente = bufferedReader.readLine();
-                if (mensagemDoCliente == null) { //adicio
+                if (mensagemDoCliente == null) { //quando o socket é fechado do lado do cliente, isso é recebido como uma mensagem nula
                     closeEverything(socket, bufferedReader, bufferedWriter); //adicio
                     break; //adicio
-                }
-                else{
+                } else if (mensagemDoCliente != null && mensagemDoCliente.equals(this.usernameCliente + ": EXIT")){
+                    closeEverything(socket, bufferedReader, bufferedWriter);
+                    break;
+                } else{
                     //caso uma mensagem seja enviada, "restartamos" os timers,
                     // impedindo que a conexão seja interrompida por mais 6 minutos!
                     if (timerInatividade != null) {

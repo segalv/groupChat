@@ -1,6 +1,9 @@
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+//ADIC
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ClientHandler implements Runnable{
     public static ArrayList <ClientHandler> clientHandlers = new ArrayList<>();
@@ -9,12 +12,18 @@ public class ClientHandler implements Runnable{
     private BufferedWriter bufferedWriter;
     private String usernameCliente;
 
+    //private Timer timerInatividade; //ADIC
+    //private Timer timerAguardoRetornoAtiv; //ADIC
+
     public ClientHandler(Socket socket){
         try {
             this.socket = socket;
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.usernameCliente = bufferedReader.readLine();
+
+            //this.timerInatividade = new Timer(); //ADIC
+            //this.timerAguardoRetornoAtiv = new Timer(); //ADIC
             clientHandlers.add(this);
             broadcastMessage("SERVIDOR: " + usernameCliente + " entrou no Chat!");
         } catch (IOException e) {
@@ -32,13 +41,68 @@ public class ClientHandler implements Runnable{
                     closeEverything(socket, bufferedReader, bufferedWriter); //adicio
                     break; //adicio
                 }
-                broadcastMessage(mensagemDoCliente);
+                else{
+                    /*
+                    //caso uma mensagem seja enviada, "restartamos" o timer,
+                    // impedindo que a conexão seja interrompida por mais 5 minutos!
+                    if (timerInatividade != null) {
+                        timerInatividade.cancel();
+                    }
+                    timerInatividade = new Timer();
+                    avisoInatividade();
+                    if (timerAguardoRetornoAtiv != null) {
+                        timerAguardoRetornoAtiv.cancel();
+                    }
+                    timerAguardoRetornoAtiv = new Timer();
+                    */
+
+                    broadcastMessage(mensagemDoCliente);
+                }
             } catch (IOException e) {
                 closeEverything(socket, bufferedReader, bufferedWriter);
                 break;
             }
         }
     }
+
+/*
+    public void avisoInatividade(){
+        TimerTask tarefa = new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    String aviso = "SERVIDOR: AVISO: Na ausência de atividade, você será desconectado em alguns instantes";
+                    bufferedWriter.write(aviso);
+                    bufferedWriter.newLine();
+                    bufferedWriter.flush();
+                    aguardaRetornoAtiv(); //esperamos por uma nova atividade nos próximos 1 min antes de desconectar o cliente
+                }catch (IOException e){
+                    e.printStackTrace(); //nao tenho certeza se esse eh o melhor catch
+                }
+            }
+        };
+        timerInatividade.schedule(tarefa, 30000); //enviamos o aviso à cada 5 minutos corridos de inatividade - 300000
+    }
+
+    public void aguardaRetornoAtiv(){
+        TimerTask tarefa = new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    String aviso = "SERVIDOR: AVISO: Você foi desconectado!";
+                    bufferedWriter.write(aviso);
+                    bufferedWriter.newLine();
+                    bufferedWriter.flush();
+                    aguardaRetornoAtiv(); //esperamos por uma nova atividade nos próximos 1 min antes de desconectar o cliente
+                }catch (IOException e){
+                    e.printStackTrace(); //nao tenho certeza se esse eh o melhor catch
+                }
+                closeEverything(socket, bufferedReader, bufferedWriter);
+            }
+        };
+        timerAguardoRetornoAtiv.schedule(tarefa, 15000); //esperamos mais 1 min antes de fechar a conexão - 60000
+    }*/
+
 
     public void broadcastMessage(String mensagem){
         for (ClientHandler clientHandler : clientHandlers){

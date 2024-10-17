@@ -99,10 +99,10 @@ public class Client {
 
     public static void main (String [] args) throws IOException {
         Scanner scanner = new Scanner(System.in); //
-        System.out.println("Entre o nome do seu usuário para ser usado no Chat (caracteres especiais não são permitidos): ");
+        System.out.println("Entre o nome do seu usuário para ser usado no Chat: ");
         String username = scanner.nextLine();
         while(username.contains("|")){
-          System.out.println("Nome de usuário inválido, insira um novo nome de usuário: "); //caso o usuário utilize o caracter especial '|' barramos a utilização pois atrapalharia o tratamento das mensagens de broadcast
+          System.out.println("Nome de usuário contém carácter inválido ('|')\n Insira um novo nome de usuário: "); //caso o usuário utilize o caracter especial '|' barramos a utilização pois atrapalharia o tratamento das mensagens de broadcast
           username = scanner.nextLine();
         }
         Socket socket = new Socket("localhost", 1234);

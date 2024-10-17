@@ -18,11 +18,12 @@ public class ClientHandler implements Runnable{
             this.socket = socket;
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.usernameCliente = bufferedReader.readLine();
+            String connect = bufferedReader.readLine();
+            this.usernameCliente = connect.substring(8); //seleciona só o conteúdo (username) de fato da mensagem CONNECT
             this.timerInatividade = new Timer();
             this.timerAguardoRetornoAtiv = new Timer();
             clientHandlers.add(this);
-            broadcastMessage("SERVIDOR: " + usernameCliente + " entrou no Chat!");
+            broadcastMessage("NOTIFICATION|" + usernameCliente + " entrou no chat!");
         } catch (IOException e) {
             closeEverything(socket, bufferedReader, bufferedWriter);
         }
@@ -34,13 +35,14 @@ public class ClientHandler implements Runnable{
         while (socket.isConnected()){
             try{
                 mensagemDoCliente = bufferedReader.readLine();
-                if (mensagemDoCliente == null) { //quando o socket é fechado do lado do cliente, isso é recebido como uma mensagem nula
-                    closeEverything(socket, bufferedReader, bufferedWriter); //adicio
-                    break; //adicio
-                } else if (mensagemDoCliente != null && mensagemDoCliente.equals(this.usernameCliente + ": EXIT")){
+                if (mensagemDoCliente == null) {
                     closeEverything(socket, bufferedReader, bufferedWriter);
                     break;
-                } else{
+                } else
+                if (mensagemDoCliente.startsWith("EXIT|")) {
+                    closeEverything(socket, bufferedReader, bufferedWriter);
+                    break;
+                } else if (mensagemDoCliente.startsWith("MSG|")) {
                     //caso uma mensagem seja enviada, "restartamos" os timers,
                     // impedindo que a conexão seja interrompida por mais 6 minutos!
                     if (timerInatividade != null) {
@@ -53,7 +55,8 @@ public class ClientHandler implements Runnable{
                     }
                     timerAguardoRetornoAtiv = new Timer();
 
-                    broadcastMessage(mensagemDoCliente);
+                    String mensagemTransmissao = mensagemDoCliente.substring(4);  // Remove o prefixo "MSG|", mas mantem o nome do cliente, e transmite a mensagem
+                    broadcastMessage(mensagemTransmissao);
                 }
             } catch (IOException e) {
                 closeEverything(socket, bufferedReader, bufferedWriter);
@@ -62,13 +65,12 @@ public class ClientHandler implements Runnable{
         }
     }
 
-
     public void avisoInatividade(){
         TimerTask tarefa = new TimerTask() {
             @Override
             public void run() {
                 try {
-                    String aviso = "SERVIDOR: AVISO: Na ausência de atividade, você será desconectado em alguns instantes";
+                    String aviso = "INACTIVE_WARNING|" + usernameCliente + "|Na ausência de atividade, você será desconectado em 1 minuto.";
                     bufferedWriter.write(aviso);
                     bufferedWriter.newLine();
                     bufferedWriter.flush();
@@ -86,14 +88,10 @@ public class ClientHandler implements Runnable{
             @Override
             public void run() {
                 try {
-                    String aviso = "SERVIDOR: AVISO: Você foi desconectado!";
+                    String aviso = "DISCONNECTED|Você foi desconectado por inatividade"; //Alteração para p padrão do protocolo
                     bufferedWriter.write(aviso);
                     bufferedWriter.newLine();
                     bufferedWriter.flush();
-                    //essa mensagem vai desencadear o fechamento do socket no lado do cliente, o que será reconhecido
-                    // como uma mensagem nula, assim fechando o socket no ClientHandler também!
-                    //Caso o socket fosse fechado aqui ao invés do lado do cliente, não conseguríamos interromper sua
-                    //execução sem culminar numa duplicata de mensagens de declaração de saída do Chat.
                 }catch (IOException e){
                     e.printStackTrace();
                 }
@@ -107,7 +105,7 @@ public class ClientHandler implements Runnable{
         for (ClientHandler clientHandler : clientHandlers){
             try{
                 if(!clientHandler.usernameCliente.equals(usernameCliente)){
-                    clientHandler.bufferedWriter.write(mensagem);
+                    clientHandler.bufferedWriter.write("BROADCAST|" + mensagem);
                     clientHandler.bufferedWriter.newLine();
                     clientHandler.bufferedWriter.flush();
                 }
@@ -117,9 +115,10 @@ public class ClientHandler implements Runnable{
         }
     }
 
+
     public void removeClientHandler(){
         clientHandlers.remove(this);
-        broadcastMessage("SERVIDOR: " + usernameCliente + " saiu do Chat!");
+        broadcastMessage("NOTIFICATION|" + usernameCliente + " saiu do chat!");
     }
 
     public void closeEverything(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter){

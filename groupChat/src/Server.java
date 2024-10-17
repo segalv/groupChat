@@ -2,7 +2,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Server {
+public class Server { //adicionar mais prints firula
     private ServerSocket serverSocket;
 
     public Server (ServerSocket serverSocket){
@@ -14,17 +14,17 @@ public class Server {
                 Socket socket = serverSocket.accept();
                 System.out.println("Um novo cliente acabou de se conectar!");
                 ClientHandler clientHandler = new ClientHandler(socket);
-                clientHandler.avisoInatividade(); //ADIC
+                clientHandler.avisoInatividade();
 
                 Thread thread = new Thread(clientHandler);
                 thread.start();
             }
-        } catch (IOException e){
-            //não to 100% com esse uso de catch...
+        } catch (IOException e){ //
         }
     }
 
-    public void closeServerSocket(){
+
+    public void closeServerSocket(){ //
         try{
             if (serverSocket != null) {
                 serverSocket.close();
